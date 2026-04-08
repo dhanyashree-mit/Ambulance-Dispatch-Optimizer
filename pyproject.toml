@@ -7,7 +7,7 @@ name = "ambulance-dispatch-env"
 version = "0.1.0"
 description = "A high-performance OpenEnv ambulance dispatch reinforcement learning environment."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "Dhanyamit"}
@@ -17,11 +17,15 @@ dependencies = [
     "pydantic>=2.3.0",
     "uvicorn>=0.23.2",
     "requests>=2.31.0",
-    "openai>=1.1.0"
+    "openai>=1.1.0",
+    "openenv-core>=0.2.0"
 ]
+
+[project.scripts]
+server = "server.app:app"
 
 [project.urls]
 "Homepage" = "https://huggingface.co/spaces/Dhanyamit/ambulance-dispatch-env"
 
 [tool.setuptools]
-packages = ["tasks", "graders", "data"]
+packages = ["tasks", "graders", "data", "server"]

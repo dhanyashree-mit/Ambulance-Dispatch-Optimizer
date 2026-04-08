@@ -2,8 +2,9 @@ import json
 import os
 import sys
 
-# Ensure the root directory is in the python path for Docker/Cloud environments
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Ensure the root directory is in the python path
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(ROOT_DIR)
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -19,8 +20,8 @@ from graders.hard_grader import grade as hard_grade
 app = FastAPI()
 
 # Load city map
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-with open(os.path.join(BASE_DIR, "data", "city_map.json"), "r") as f:
+CITY_MAP_PATH = os.path.join(ROOT_DIR, "data", "city_map.json")
+with open(CITY_MAP_PATH, "r") as f:
     CITY_MAP = json.load(f)
 
 # Global State
