@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build_backend = "setuptools.build_meta"
+
+[project]
+name = "ambulance-dispatch-env"
+version = "0.1.0"
+description = "A high-performance OpenEnv ambulance dispatch reinforcement learning environment."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Dhanyamit"}
+]
+dependencies = [
+    "fastapi>=0.103.1",
+    "pydantic>=2.3.0",
+    "uvicorn>=0.23.2",
+    "requests>=2.31.0",
+    "openai>=1.1.0"
+]
+
+[project.urls]
+"Homepage" = "https://huggingface.co/spaces/Dhanyamit/ambulance-dispatch-env"
+
+[tool.setuptools]
+packages = ["tasks", "graders", "data"]
