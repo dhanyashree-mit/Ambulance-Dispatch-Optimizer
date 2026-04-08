@@ -53,4 +53,4 @@ def grade(state, action, city_map):
                 
         reward += em_reward
 
-    return max(0.0, min(1.0, reward))
+    return max(0.01, min(0.99, reward))

@@ -103,8 +103,8 @@ Do not output any markdown formatting, only pure JSON."""
             break
 
     # Calculate final score across steps normalized to 0-1
-    score = max(rewards) if rewards else 0.0
-    score = min(max(score, 0.0), 1.0)
+    score = max(rewards) if rewards else 0.01
+    score = min(max(score, 0.01), 0.99)
     success = score >= 0.5
 
     log_end(success=success, steps=step_count, score=score, rewards=rewards)

@@ -135,7 +135,7 @@ def step_env(req: StepRequest = StepRequest()):
     elif current_task == "hard":
         reward = hard_grade(current_state, action_dict, CITY_MAP)
     else:
-        reward = 0.0
+        reward = 0.01
 
     # Advance Simulation Time
     for e_id, em in current_state["emergencies"].items():

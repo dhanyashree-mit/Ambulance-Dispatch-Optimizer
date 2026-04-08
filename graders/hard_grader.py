@@ -11,4 +11,4 @@ def grade(state, action, city_map):
     ]
 
     penalty = len(broken_ambs) * len(unserved_critical) * 0.05
-    return max(0.0, min(1.0, base_reward - penalty))
+    return max(0.01, min(0.99, base_reward - penalty))
