@@ -52,7 +52,7 @@ def home():
     }
 
 @app.post("/reset", response_model=Dict[str, Any])
-def reset_env(req: ResetRequest):
+def reset_env(req: ResetRequest = ResetRequest()):
     global current_state, current_task, step_count
     task_id = req.task_id
     current_task = task_id
@@ -79,7 +79,7 @@ def get_state():
     return current_state
 
 @app.post("/step", response_model=StepResponse)
-def step_env(req: StepRequest):
+def step_env(req: StepRequest = StepRequest()):
     global current_state, step_count, current_task
     
     if not current_state:
