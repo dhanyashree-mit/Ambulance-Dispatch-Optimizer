@@ -1,0 +1,25 @@
+name: ambulance-dispatch-env
+version: 1.0.0
+description: A hospital ambulance dispatcher simulation with dynamic traffic and break down events.
+author: User
+tasks:
+  - easy
+  - medium
+  - hard
+observation_space:
+  zones: list of 16 city zones on a 4x4 grid
+  ambulances: dict of ambulance_id to status, location, eta, destination
+  emergencies: dict of emergency_id to location, severity, time_since_call, status
+  time_of_day: one of normal, rush_hour, night
+  dynamic_events: list of upcoming events with step trigger and type
+
+action_space:
+  ambulance_id: string ID of an available ambulance
+  emergency_id: string ID of an active emergency
+deployment:
+  port: 7860
+  protocol: http
+  endpoints:
+    - POST /reset
+    - GET /state
+    - POST /step
