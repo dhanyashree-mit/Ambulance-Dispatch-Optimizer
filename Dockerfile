@@ -10,17 +10,16 @@ WORKDIR /app
 # Install uv for fast dependency management
 RUN pip install uv
 
-# Install dependencies using the lock file
-COPY pyproject.toml uv.lock ./
-RUN uv pip install --system --no-cache .
-
-# Copy project modules
+# Copy project configuration AND all source code first
+# This ensures setuptools can find packages (tasks, server, etc.) and README.md during installation
+COPY pyproject.toml uv.lock README.md openenv.yaml ./
 COPY tasks/ tasks/
 COPY graders/ graders/
 COPY data/ data/
 COPY server/ server/
-COPY openenv.yaml .
-COPY README.md .
+
+# Install the project and dependencies using the lock file
+RUN uv pip install --system --no-cache .
 
 # Expose port
 EXPOSE 7860
