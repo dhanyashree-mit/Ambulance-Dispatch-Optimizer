@@ -50,6 +50,14 @@ For each emergency:
 
 The total sum across all emergencies is clamped to `0.0 - 1.0` before being returned.
 
+## City Simulation
+The city is modelled as a 4x4 grid of 16 named zones (A1–D4).
+* **Grid**: Travel times are pre-computed between all zone pairs based on Manhattan distance.
+* **Traffic Multipliers**: 
+  * `normal`: 1.0x
+  * `rush_hour`: 1.8x
+  * `night`: 0.7x
+
 ## Tasks
 * **easy** (Difficulty: Easy): 1 ambulance, 1 emergency. Agent must pick the correct match.
 * **medium** (Difficulty: Medium): 3 ambulances, 5 emergencies in multiple zones. Standard multi-agent routing.
@@ -57,8 +65,8 @@ The total sum across all emergencies is clamped to `0.0 - 1.0` before being retu
 
 ## Baseline Scores (using gpt-4o via inference.py)
 * **easy**: ~1.0 (Optimal action successfully taken out of the gate)
-* **medium**: ~4.1 (Near optimal sequential assignments mapped)
-* **hard**: ~3.5 (Fractional penalty dropoffs due to exact dynamic breakdown and rush hour delays)
+* **medium**: ~0.5 (Near optimal sequential assignments mapped)
+* **hard**: ~0.3 (Fractional penalty dropoffs due to exact dynamic breakdown and rush hour delays)
 
 ## How to Run Locally
 
@@ -87,6 +95,14 @@ The `inference.py` script strictly follows the mandatory OpenEnv sample format, 
 $env:API_BASE_URL="https://api.openai.com/v1"
 $env:MODEL_NAME="gpt-4o"
 $env:HF_TOKEN="your_key_here"
+python inference.py
+```
+
+```bash
+# Linux/Mac Example
+export API_BASE_URL="https://router.huggingface.co/v1"
+export MODEL_NAME="Qwen/Qwen2.5-72B-Instruct"
+export HF_TOKEN="your_token_here"
 python inference.py
 ```
 

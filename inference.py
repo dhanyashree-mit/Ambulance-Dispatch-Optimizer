@@ -21,18 +21,19 @@ def log_start(task: str, env: str, model: str) -> None:
 def log_step(step: int, action: str, reward: float, done: bool, error: Optional[str]) -> None:
     error_val = error if error else "null"
     done_val = str(done).lower()
-    print(f"[STEP]  step={step} action={action} reward={reward:.2f} done={done_val} error={error_val}", flush=True)
+    print(f"[STEP] step={step} action={action} reward={reward:.2f} done={done_val} error={error_val}", flush=True)
 
-def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
+def log_end(success: bool, steps: int, rewards: List[float]) -> None:
     rewards_str = ",".join(f"{r:.2f}" for r in rewards)
-    print(f"[END]   success={str(success).lower()} steps={steps} score={score:.2f} rewards={rewards_str}", flush=True)
+    print(f"[END] success={str(success).lower()} steps={steps} rewards={rewards_str}", flush=True)
 
 def run_task(task_id: str):
     client = OpenAI(api_key=HF_TOKEN, base_url=API_BASE_URL)
     
     res = requests.post(f"{ENV_URL}/reset", json={"task_id": task_id})
     if res.status_code != 200:
-        print(f"Failed to reset task {task_id}")
+        import sys
+        print(f"Failed to reset task {task_id}", file=sys.stderr)
         return
         
     state = res.json()
@@ -107,7 +108,7 @@ Do not output any markdown formatting, only pure JSON."""
     score = min(max(score, 0.01), 0.99)
     success = score >= 0.5
 
-    log_end(success=success, steps=step_count, score=score, rewards=rewards)
+    log_end(success=success, steps=step_count, rewards=rewards)
 
 if __name__ == "__main__":
     tasks = ["easy", "medium", "hard"]
