@@ -29,10 +29,10 @@ def log_step(step: int, action: str, reward: float, done: bool, error: Optional[
     reward_formatted = f"{float(reward):.2f}"
     print(f"[STEP] step={step} action={action} reward={reward_formatted} done={done_val} error={error_val}", flush=True)
 
-def log_end(success: bool, steps: int, rewards: List[float]) -> None:
+def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
     rewards_str = ",".join(f"{float(r):.2f}" for r in rewards)
     success_val = str(success).lower()
-    print(f"[END] success={success_val} steps={steps} rewards={rewards_str}", flush=True)
+    print(f"[END] success={success_val} steps={steps} score={score:.2f} rewards={rewards_str}", flush=True)
 
 def run_task(task_id: str):
     log_start(task=task_id, env=BENCHMARK, model=MODEL_NAME)
@@ -147,7 +147,11 @@ Do not output any markdown formatting, only pure JSON."""
             rewards = [0.01]
             step_count = 1
         
-        log_end(success=success, steps=step_count, rewards=rewards)
+        # Calculate final score across steps normalized to 0-1
+        score = max(rewards) if rewards else 0.01
+        score = min(max(score, 0.01), 0.99)
+        
+        log_end(success=success, steps=step_count, score=score, rewards=rewards)
 
 if __name__ == "__main__":
     # Small delay to ensure server is ready if run in a bundle

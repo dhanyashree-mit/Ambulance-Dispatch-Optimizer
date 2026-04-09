@@ -158,23 +158,8 @@ def step_env(req: StepRequest = StepRequest()):
 
     done = all(em["status"] == "handled" for em in current_state["emergencies"].values()) or step_count >= 20
 
-    # 5. Phase 2 Compliance Logic
-    # Every individual reward must be strictly in (0, 1). 
-    # Total Task Score (sum of rewards) must be strictly in (0, 1).
-    if done:
-        avg_perf = total_reward / step_count
-        # Target Total Score G is scaled to (0.3, 0.9) to be safely away from 0.0 and 1.0 limits.
-        target_total = 0.3 + (avg_perf * 0.6)
-        distributed_so_far = (step_count - 1) * 0.01
-        final_reward = target_total - distributed_so_far
-        # Ensure final step is also strictly positive and non-boundary
-        final_reward = float(max(0.01, min(0.98, final_reward)))
-    else:
-        # Every step reward must be non-zero
-        final_reward = 0.01
-
     return StepResponse(
-        reward=final_reward,
+        reward=step_reward,
         done=done,
         info=feedback,
         observation=current_state
