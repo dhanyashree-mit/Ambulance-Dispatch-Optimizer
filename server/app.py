@@ -91,13 +91,13 @@ def step_env(req: StepRequest = StepRequest()):
     step_count += 1
     feedback = {"events": []}
     
-    # Check dynamic events (Hard mode)
+    # 1. Process dynamic events (Hard mode)
     events = current_state.get("dynamic_events", [])
     for event in events:
         if event.get("step") == step_count:
             if event["type"] == "traffic_spike":
                 current_state["time_of_day"] = event["time_of_day"]
-                feedback["events"].append("Traffic condition changed to " + event["time_of_day"])
+                feedback["events"].append(f"Traffic condition changed to {event['time_of_day']}")
             elif event["type"] == "breakdown":
                 amb_id = event["ambulance_id"]
                 if amb_id in current_state["ambulances"]:
@@ -109,7 +109,7 @@ def step_env(req: StepRequest = StepRequest()):
                     current_state["emergencies"][e_id] = e_data
                 feedback["events"].append("New critical emergencies strictly reported!")
 
-    # Process Action
+    # 2. Process Action
     action_dict = None
     if req.action:
         amb_id = req.action.ambulance_id
@@ -129,7 +129,7 @@ def step_env(req: StepRequest = StepRequest()):
                 mult = CITY_MAP["traffic_multipliers"][current_state["time_of_day"]]
                 amb["eta"] = max(1, int(dist * mult))
 
-    # Evaluate Reward
+    # 3. Evaluate Reward
     if current_task == "easy":
         step_reward = easy_grade(current_state, action_dict, CITY_MAP)
     elif current_task == "medium":
@@ -141,7 +141,7 @@ def step_env(req: StepRequest = StepRequest()):
 
     total_reward += step_reward
 
-    # Advance Simulation Time
+    # 4. Advance Simulation Time
     for e_id, em in current_state["emergencies"].items():
         if em["status"] == "active":
             em["time_since_call"] += 1
@@ -158,20 +158,19 @@ def step_env(req: StepRequest = StepRequest()):
 
     done = all(em["status"] == "handled" for em in current_state["emergencies"].values()) or step_count >= 20
 
-    # Phase 2 Compliance: Strictly between (0, 1). No 0.0 or 1.0 allowed anywhere.
-    # We give 0.01 per step, and adjust the last step to reach the target average.
+    # 5. Phase 2 Compliance Logic
+    # Every individual reward must be strictly in (0, 1). 
+    # Total Task Score (sum of rewards) must be strictly in (0, 1).
     if done:
         avg_perf = total_reward / step_count
-        # We've already given (step_count - 1) * 0.01 in prior steps.
-        # We need the total sum to be max(0.01, min(0.99, avg_perf))
-        target_total = max(0.01, min(0.99, avg_perf))
+        # Target Total Score G is scaled to (0.3, 0.9) to be safely away from 0.0 and 1.0 limits.
+        target_total = 0.3 + (avg_perf * 0.6)
         distributed_so_far = (step_count - 1) * 0.01
         final_reward = target_total - distributed_so_far
-        # Ensure final step is also strictly positive
-        final_reward = max(0.01, final_reward)
+        # Ensure final step is also strictly positive and non-boundary
+        final_reward = float(max(0.01, min(0.98, final_reward)))
     else:
-        # Every step MUST be non-zero to satisfy "Each task's score strictly between 0 and 1" 
-        # specifically if they validator checks individual reward entries.
+        # Every step reward must be non-zero
         final_reward = 0.01
 
     return StepResponse(
