@@ -92,7 +92,7 @@ Do not output any markdown formatting, only pure JSON."""
             state = step_data["observation"]
             done = step_data["done"]
         except Exception as e:
-            reward = 0.0
+            reward = 0.01
             done = True
             error = error or str(e)
 

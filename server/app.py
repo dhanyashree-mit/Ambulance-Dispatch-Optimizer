@@ -28,6 +28,7 @@ with open(CITY_MAP_PATH, "r") as f:
 current_state = {}
 current_task = None
 step_count = 0
+total_reward = 0.0
 
 class ResetRequest(BaseModel):
     task_id: str = "easy"
@@ -54,10 +55,11 @@ def home():
 
 @app.post("/reset", response_model=Dict[str, Any])
 def reset_env(req: ResetRequest = ResetRequest()):
-    global current_state, current_task, step_count
+    global current_state, current_task, step_count, total_reward
     task_id = req.task_id
     current_task = task_id
     step_count = 0
+    total_reward = 0.0
 
     if task_id == "easy":
         current_state = get_easy_config()
@@ -81,7 +83,7 @@ def get_state():
 
 @app.post("/step", response_model=StepResponse)
 def step_env(req: StepRequest = StepRequest()):
-    global current_state, step_count, current_task
+    global current_state, step_count, current_task, total_reward
     
     if not current_state:
         raise HTTPException(status_code=400, detail="Environment not reset")
@@ -129,13 +131,15 @@ def step_env(req: StepRequest = StepRequest()):
 
     # Evaluate Reward
     if current_task == "easy":
-        reward = easy_grade(current_state, action_dict, CITY_MAP)
+        step_reward = easy_grade(current_state, action_dict, CITY_MAP)
     elif current_task == "medium":
-        reward = medium_grade(current_state, action_dict, CITY_MAP)
+        step_reward = medium_grade(current_state, action_dict, CITY_MAP)
     elif current_task == "hard":
-        reward = hard_grade(current_state, action_dict, CITY_MAP)
+        step_reward = hard_grade(current_state, action_dict, CITY_MAP)
     else:
-        reward = 0.01
+        step_reward = 0.01
+
+    total_reward += step_reward
 
     # Advance Simulation Time
     for e_id, em in current_state["emergencies"].items():
@@ -154,8 +158,14 @@ def step_env(req: StepRequest = StepRequest()):
 
     done = all(em["status"] == "handled" for em in current_state["emergencies"].values()) or step_count >= 20
 
+    # Phase 2 Compliance: Return 0.0 for steps, and averaged performance (0.01-0.99) on done.
+    if done:
+        final_reward = max(0.01, min(0.99, total_reward / step_count))
+    else:
+        final_reward = 0.0
+
     return StepResponse(
-        reward=reward,
+        reward=final_reward,
         done=done,
         info=feedback,
         observation=current_state
